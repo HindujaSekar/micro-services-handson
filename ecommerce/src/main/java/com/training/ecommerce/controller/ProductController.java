@@ -3,16 +3,14 @@ package com.training.ecommerce.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.training.ecommerce.dto.*;
+import com.training.ecommerce.entity.ProductType;
+import com.training.ecommerce.service.FundTransferServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.training.ecommerce.dto.CartDto;
 import com.training.ecommerce.entity.OrderHistory;
 import com.training.ecommerce.entity.Product;
 import com.training.ecommerce.service.ProductService;
@@ -23,13 +21,29 @@ public class ProductController {
 	
 	@Autowired
 	private ProductService service;
+
+	@Autowired
+	private FundTransferServiceImpl fundTransferService;
+
+	@PostMapping("/{register}")
+	public ResponseEntity<CredentialDto> register(@RequestBody RegisterDto registerDto){
+		return new ResponseEntity<>(fundTransferService.register(registerDto), HttpStatus.CREATED);
+	}
+	@PostMapping("/payment/{fromAccountId}")
+	public ResponseEntity<OrderDetailsDto> makePayment(@PathVariable("fromAccountId") long fromAccountId){
+		return new ResponseEntity<>(service.makePayment(fromAccountId), HttpStatus.OK);
+	}
+	@PostMapping("/{login}")
+	public ResponseEntity<AccountInfoDto> login(@RequestBody CredentialDto dto){
+		return new ResponseEntity<>(fundTransferService.login(dto), HttpStatus.OK);
+	}
 	
 	@GetMapping("/")
 	public ResponseEntity<List<Product>> findAllProducts(){
 		return new ResponseEntity<>(service.findAllProducts(),HttpStatus.OK);
 	}
 	@GetMapping("/{productType}")
-	public ResponseEntity<List<Product>> findProductsByCategory(@PathVariable("productType")String productType ){
+	public ResponseEntity<List<Product>> findProductsByCategory(@PathVariable("productType") ProductType productType ){
 		return new ResponseEntity<>(service.findProductsByCategory(productType),HttpStatus.OK);
 	}
 	@GetMapping("/history")
@@ -41,14 +55,14 @@ public class ProductController {
 			@PathVariable("toDate") LocalDate toDate){
 		return new ResponseEntity<>(service.findOrdersBetweenGivenDates(fromDate, toDate),HttpStatus.OK);
 	}
-	@PostMapping("/{productIds}")
-	public ResponseEntity<CartDto> addProductToCart(@PathVariable("productIds")String[] productIds){
-		return new ResponseEntity<>(service.addProductToCart(productIds),HttpStatus.CREATED);
+	@PostMapping("/cart/{productId}")
+	public ResponseEntity<CartDto> addProductToCart(@PathVariable("productId")String productId){
+		return new ResponseEntity<>(service.addProductToCart(productId),HttpStatus.CREATED);
 	}
-	@PostMapping("/{cartId}/{productIds}")
+	@PutMapping("/{cartId}/{productId}")
 	public ResponseEntity<String> updateCart(@PathVariable("cartId") long cartId,
-			@PathVariable("productIds") String[] productIds){
-		return new ResponseEntity<>(service.updateCart(cartId, productIds),HttpStatus.OK);
+			@PathVariable("productId") long productId){
+		return new ResponseEntity<>(service.updateCart(cartId, productId),HttpStatus.OK);
 	}
 	
 

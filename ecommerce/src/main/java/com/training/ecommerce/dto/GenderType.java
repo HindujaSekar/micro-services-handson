@@ -1,4 +1,4 @@
-package com.training.parent.dto;
+package com.training.ecommerce.dto;
 
 public enum GenderType {
 	Female,Male,Others;

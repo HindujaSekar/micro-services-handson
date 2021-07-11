@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class CartDto {
 	
-	private String[] productIds;
+	private long productId;
 	private double total;
 
 }

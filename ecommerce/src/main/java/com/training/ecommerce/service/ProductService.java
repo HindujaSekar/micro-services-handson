@@ -1,17 +1,19 @@
 package com.training.ecommerce.service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.training.ecommerce.client.FundTransferInterface;
+import com.training.ecommerce.dto.OrderDetailsDto;
+import com.training.ecommerce.dto.ProductDto;
+import com.training.ecommerce.entity.*;
+import com.training.ecommerce.exceptions.TransactionFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.training.ecommerce.dto.CartDto;
-import com.training.ecommerce.entity.Cart;
-import com.training.ecommerce.entity.OrderHistory;
-import com.training.ecommerce.entity.Product;
-import com.training.ecommerce.entity.ProductType;
 import com.training.ecommerce.repository.CartRepository;
 import com.training.ecommerce.repository.OrderHistoryRepository;
 import com.training.ecommerce.repository.ProductRepository;
@@ -28,15 +30,17 @@ public class ProductService {
 	private OrderHistoryRepository historyRepository;
 	@Autowired
 	private CartRepository cartRepository;
+	@Autowired
+	private FundTransferInterface fundTransferInterface;
 	
 	
 	public List<Product> findAllProducts(){
 		log.info("Got all products");
 		return repository.findAll();
 	}
-	public List<Product> findProductsByCategory(String productType ){
+	public List<Product> findProductsByCategory(ProductType productType ){
 		log.info("Got all products based on type");
-		return repository.findByProductType(ProductType.valueOf(productType));
+		return repository.findByProductType(productType);
 	}
 	public List<OrderHistory> findMyOrders(){
 		log.info("Got all orders");
@@ -46,14 +50,11 @@ public class ProductService {
 		log.info("Got all orders between "+fromDate+ " and "+toDate);
 		return historyRepository.findByOrderedDateBetween(fromDate, toDate);
 	}
-	public CartDto addProductToCart(String[] productIds){
+	public CartDto addProductToCart(String productId){
 		
 		List<Product> products = new ArrayList<>();
-		double total = 0;
-		for(String id : productIds){
-			products.add(repository.getById(Long.parseLong(id)));
-			total+=repository.getById(Long.parseLong(id)).getPrice();
-		}
+		products.add(repository.getById(Long.parseLong(productId)));
+		double total = repository.getById(Long.parseLong(productId)).getPrice();
 		Cart cart = Cart.builder()
 				.products(products)
 				.total(total)
@@ -61,22 +62,55 @@ public class ProductService {
 		cartRepository.save(cart);
 		log.info("added products to cart");
 		return CartDto.builder()
-				.productIds(productIds)
+				.productId(Long.parseLong(productId))
 				.total(total).build();
 						
 	}
-	public String updateCart(long cartId, String[] productIds){
+	public String updateCart(long cartId, long productId){
 		Cart cart = cartRepository.findById(cartId).get();
 		List<Product> products = cart.getProducts();
 		double total = cart.getTotal();
-		for(String id : productIds){
-			products.add(repository.getById(Long.parseLong(id)));
-			total+=repository.getById(Long.parseLong(id)).getPrice();
-		}
+		products.add(repository.getById(productId));
+		total+=repository.getById(productId).getPrice();
 		cart.setProducts(products);
 		cart.setTotal(total);
 		cartRepository.save(cart);
 		log.info("added products to cart");
 		return"UpdatedSucessfully";	
+	}
+	public OrderDetailsDto makePayment(long fromAccountId){
+		List<Cart> carts = cartRepository.findAll();
+		Cart cart = carts.get(0);
+		double amount = cart.getTotal();
+		long toAccountId = 4;
+		String message = fundTransferInterface.fundTransfer(fromAccountId,toAccountId,amount).getBody();
+		List<Product> products = cart.getProducts();
+		List<Product> productsForOrder = new ArrayList<>();
+		for(Product product : products)
+			productsForOrder.add(product);
+		if(message.equals("transaction successful")){
+			OrderHistory history = OrderHistory.builder()
+					.products(productsForOrder)
+					.orderedDate(LocalDate.now())
+					.orderedTime(LocalTime.now())
+					.orderStatus(OrderStatus.OrderConfirmed)
+					.paymentStatus(PaymentStatus.PaymentSuccess)
+					.total(cart.getTotal())
+					.build();
+			historyRepository.save(history);
+			cartRepository.delete(cart);
+			List<ProductDto> productDtos = new ArrayList<>();
+			for(Product product:history.getProducts()){
+				productDtos.add(ProductDto.builder()
+						.brand(product.getBrand())
+						.modelName(product.getModelName())
+						.price(product.getPrice()).build());
+			}
+			return OrderDetailsDto.builder()
+					.products(productDtos).total(history.getTotal()).build();
+		}
+		else{
+				throw new TransactionFailedException("transaction failed");
+		}
 	}
 }
