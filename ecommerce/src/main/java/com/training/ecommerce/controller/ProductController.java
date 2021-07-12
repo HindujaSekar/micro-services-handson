@@ -23,7 +23,6 @@ import com.training.ecommerce.dto.RegisterDto;
 import com.training.ecommerce.entity.OrderHistory;
 import com.training.ecommerce.entity.Product;
 import com.training.ecommerce.entity.ProductType;
-import com.training.ecommerce.service.FundTransferServiceImpl;
 import com.training.ecommerce.service.ProductService;
 
 @RestController
@@ -33,12 +32,9 @@ public class ProductController {
 	@Autowired
 	private ProductService service;
 
-	@Autowired
-	private FundTransferServiceImpl fundTransferService;
-
 	@PostMapping("/{register}")
 	public ResponseEntity<CredentialDto> register(@RequestBody RegisterDto registerDto){
-		return new ResponseEntity<>(fundTransferService.register(registerDto), HttpStatus.CREATED);
+		return new ResponseEntity<>(service.addUser(registerDto), HttpStatus.CREATED);
 	}
 	@PostMapping("/payment/{fromAccountId}")
 	public ResponseEntity<OrderDetailsDto> makePayment(@PathVariable("fromAccountId") long fromAccountId){
@@ -46,7 +42,7 @@ public class ProductController {
 	}
 	@PostMapping("/{login}")
 	public ResponseEntity<AccountInfoDto> login(@RequestBody CredentialDto dto){
-		return new ResponseEntity<>(fundTransferService.login(dto), HttpStatus.OK);
+		return new ResponseEntity<>(service.login(dto), HttpStatus.OK);
 	}
 	
 	@GetMapping("/")

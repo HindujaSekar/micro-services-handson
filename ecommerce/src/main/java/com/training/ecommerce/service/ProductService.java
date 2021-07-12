@@ -9,15 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.training.ecommerce.client.FundTransferInterface;
+import com.training.ecommerce.dto.AccountInfoDto;
 import com.training.ecommerce.dto.CartDto;
+import com.training.ecommerce.dto.CredentialDto;
 import com.training.ecommerce.dto.OrderDetailsDto;
 import com.training.ecommerce.dto.ProductDto;
+import com.training.ecommerce.dto.RegisterDto;
 import com.training.ecommerce.entity.Cart;
+import com.training.ecommerce.entity.ECommerceUser;
 import com.training.ecommerce.entity.OrderHistory;
 import com.training.ecommerce.entity.OrderStatus;
 import com.training.ecommerce.entity.PaymentStatus;
 import com.training.ecommerce.entity.Product;
 import com.training.ecommerce.entity.ProductType;
+import com.training.ecommerce.exceptions.AuthenticationException;
+import com.training.ecommerce.exceptions.DuplicateUserException;
+import com.training.ecommerce.exceptions.NoSuchUserException;
 import com.training.ecommerce.exceptions.ProductExistsException;
 import com.training.ecommerce.exceptions.ProductNotExistsException;
 import com.training.ecommerce.exceptions.TransactionFailedException;
@@ -25,6 +32,7 @@ import com.training.ecommerce.exceptions.UnHandledCartException;
 import com.training.ecommerce.repository.CartRepository;
 import com.training.ecommerce.repository.OrderHistoryRepository;
 import com.training.ecommerce.repository.ProductRepository;
+import com.training.ecommerce.repository.UserRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,6 +48,45 @@ public class ProductService {
 	private CartRepository cartRepository;
 	@Autowired
 	private FundTransferInterface fundTransferInterface;
+	@Autowired
+	private UserRepository userRepository;
+	
+	 public ECommerceUser getUserByEmail(String email) {
+	        if (userRepository.existsUserByEmail(email))
+	            return userRepository.findByEmail(email);
+	        else {
+	            log.info("User doesn't exist");
+	            throw new NoSuchUserException("User cannot be found");
+	        }
+	    }
+
+	public CredentialDto addUser(RegisterDto registerDto) {
+		if (userRepository.existsUserByEmail(registerDto.getEmail()))
+			throw new DuplicateUserException("User already registered");
+		ECommerceUser user = ECommerceUser.builder()
+				.name(registerDto.getName())
+				.email(registerDto.getEmail())
+				.gender(registerDto.getGender())
+				.password(registerDto.getPassword())
+				.build();
+		userRepository.save(user);
+		return CredentialDto.builder().email(user.getEmail()).password(user.getPassword()).build();
+
+	}
+	
+	public AccountInfoDto login(CredentialDto dto) {
+		ECommerceUser user = getUserByEmail(dto.getEmail());
+        if (user.getPassword().equals(dto.getPassword()))
+            return AccountInfoDto.builder()
+                    .email(user.getEmail())
+                    .userName(user.getName())
+                    .genderType(user.getGender())
+                    .build();
+        else {
+            log.info("Authentication failed");
+            throw new AuthenticationException("Password is wrong");
+        }
+    }
 
 	public List<Product> findAllProducts() {
 		log.info("Got all products");
@@ -103,7 +150,7 @@ public class ProductService {
 			cart.setProducts(products);
 			cart.setTotal(total);
 			cartRepository.save(cart);
-			if(total == 0){
+			if (total == 0) {
 				cartRepository.delete(cart);
 			}
 			log.info("removed product from cart");

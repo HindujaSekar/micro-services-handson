@@ -1,16 +1,20 @@
 package com.training.springbootusecase.controllers;
 
-import com.training.springbootusecase.entity.AccountType;
-import com.training.springbootusecase.entity.GenderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.training.springbootusecase.dto.AccountInfoDto;
 import com.training.springbootusecase.dto.BeneficiaryDto;
 import com.training.springbootusecase.dto.CredentialDto;
 import com.training.springbootusecase.dto.RequestDto;
+import com.training.springbootusecase.entity.AccountType;
+import com.training.springbootusecase.entity.GenderType;
 import com.training.springbootusecase.service.AccountService;
 
 import lombok.extern.slf4j.Slf4j;

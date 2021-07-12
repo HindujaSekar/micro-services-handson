@@ -11,18 +11,13 @@ public class RegisterDto {
 	private String email;
 	private String password;
 	private GenderType gender;
-	private AccountType accountType;
-	private double balance;
 	public RegisterDto() {}
-	public RegisterDto(String name, String email, String password, GenderType gender, AccountType accountType,
-			double balance) {
+	public RegisterDto(String name, String email, String password, GenderType gender) {
 		super();
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.gender = gender;
-		this.accountType = accountType;
-		this.balance = balance;
 	}
 	
 	
