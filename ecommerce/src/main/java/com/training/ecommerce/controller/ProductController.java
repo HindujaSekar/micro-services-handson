@@ -3,16 +3,27 @@ package com.training.ecommerce.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.training.ecommerce.dto.*;
-import com.training.ecommerce.entity.ProductType;
-import com.training.ecommerce.service.FundTransferServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.training.ecommerce.dto.AccountInfoDto;
+import com.training.ecommerce.dto.CartDto;
+import com.training.ecommerce.dto.CredentialDto;
+import com.training.ecommerce.dto.OrderDetailsDto;
+import com.training.ecommerce.dto.RegisterDto;
 import com.training.ecommerce.entity.OrderHistory;
 import com.training.ecommerce.entity.Product;
+import com.training.ecommerce.entity.ProductType;
+import com.training.ecommerce.service.FundTransferServiceImpl;
 import com.training.ecommerce.service.ProductService;
 
 @RestController
@@ -51,13 +62,19 @@ public class ProductController {
 		return new ResponseEntity<>(service.findMyOrders(),HttpStatus.OK);
 	}
 	@GetMapping("/{fromDate}/{toDate}")
-	public ResponseEntity<List<OrderHistory>> findOrdersBetweenGivenDates(@PathVariable("fromDate") LocalDate fromDate,
-			@PathVariable("toDate") LocalDate toDate){
-		return new ResponseEntity<>(service.findOrdersBetweenGivenDates(fromDate, toDate),HttpStatus.OK);
+	public ResponseEntity<List<OrderHistory>> findOrdersBetweenGivenDates(@PathVariable("fromDate") String fromDate,
+			@PathVariable("toDate") String toDate){
+		return new ResponseEntity<>(service.findOrdersBetweenGivenDates(LocalDate.parse(fromDate),
+				LocalDate.parse(toDate)),HttpStatus.OK);
 	}
 	@PostMapping("/cart/{productId}")
 	public ResponseEntity<CartDto> addProductToCart(@PathVariable("productId")String productId){
 		return new ResponseEntity<>(service.addProductToCart(productId),HttpStatus.CREATED);
+	}
+	@DeleteMapping("{cartId}/{productId}")
+	public ResponseEntity<String> removeProductFromCart(@PathVariable("cartId") long cartId,
+			@PathVariable("productId") long productId){
+		return new ResponseEntity<>(service.removeProductFromCart(cartId, productId),HttpStatus.OK);
 	}
 	@PutMapping("/{cartId}/{productId}")
 	public ResponseEntity<String> updateCart(@PathVariable("cartId") long cartId,

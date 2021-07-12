@@ -3,12 +3,10 @@ package com.training.ecommerce.service;
 import com.training.ecommerce.client.FundTransferInterface;
 import com.training.ecommerce.dto.AccountInfoDto;
 import com.training.ecommerce.dto.CredentialDto;
-import com.training.ecommerce.dto.FundTransferDto;
 import com.training.ecommerce.dto.RegisterDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class FundTransferServiceImpl {

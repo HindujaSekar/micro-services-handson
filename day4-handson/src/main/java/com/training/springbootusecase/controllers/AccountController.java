@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import com.training.springbootusecase.dto.AccountInfoDto;
 import com.training.springbootusecase.dto.BeneficiaryDto;
 import com.training.springbootusecase.dto.CredentialDto;
-import com.training.springbootusecase.dto.FundTransferDto;
 import com.training.springbootusecase.dto.RequestDto;
 import com.training.springbootusecase.service.AccountService;
 

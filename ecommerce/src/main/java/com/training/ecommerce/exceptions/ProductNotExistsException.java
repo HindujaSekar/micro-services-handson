@@ -1,10 +1,11 @@
 package com.training.ecommerce.exceptions;
 
-public class TransactionFailedException extends RuntimeException{
+public class ProductNotExistsException extends RuntimeException{
 
 	private static final long serialVersionUID = 1L;
 
-	public TransactionFailedException(String message) {
+	public ProductNotExistsException(String message) {
         super(message);
     }
 }
+

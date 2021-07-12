@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.training.springbootusecase.dto.AccountInfoDto;
 import com.training.springbootusecase.dto.BeneficiaryDto;
 import com.training.springbootusecase.dto.CredentialDto;
-import com.training.springbootusecase.dto.FundTransferDto;
 import com.training.springbootusecase.dto.RequestDto;
 import com.training.springbootusecase.exceptions.AuthenticationException;
 import com.training.springbootusecase.exceptions.DuplicateUserException;

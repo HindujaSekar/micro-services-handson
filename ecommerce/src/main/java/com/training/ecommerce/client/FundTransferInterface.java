@@ -1,11 +1,14 @@
 package com.training.ecommerce.client;
 
-import com.training.ecommerce.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import com.training.ecommerce.dto.AccountInfoDto;
+import com.training.ecommerce.dto.AccountType;
+import com.training.ecommerce.dto.CredentialDto;
+import com.training.ecommerce.dto.GenderType;
 
 @FeignClient(url="http://localhost:8083/fund-transfer", name = "fund-transfer-application")
 public interface FundTransferInterface {
